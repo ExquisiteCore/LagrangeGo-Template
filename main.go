@@ -1,4 +1,3 @@
-// nolint
 package main
 
 import (
@@ -8,6 +7,7 @@ import (
 
 	"github.com/ExquisiteCore/LagrangeGo-Template/bot"
 	"github.com/ExquisiteCore/LagrangeGo-Template/config"
+	"github.com/ExquisiteCore/LagrangeGo-Template/logic"
 	"github.com/ExquisiteCore/LagrangeGo-Template/utils"
 )
 
@@ -23,6 +23,8 @@ func init() {
 func main() {
 
 	bot.Login()
+
+	logic.Startlogic()
 
 	defer bot.QQClient.Release()
 
