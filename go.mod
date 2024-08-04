@@ -1,4 +1,4 @@
-module LagrangeGo-Template
+module github.com/ExquisiteCore/LagrangeGo-Template
 
 go 1.22.4
 
