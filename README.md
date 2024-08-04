@@ -24,6 +24,8 @@ password = "pwd"
 
 克隆本项目
 
+修改[logic/logic.go](./logic/logic.go)文件里的逻辑部分
+
 ## 引入的第三方 go module
 
 - [LagrangeGo](https://github.com/LagrangeDev/LagrangeGo)
