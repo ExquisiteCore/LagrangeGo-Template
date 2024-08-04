@@ -4,7 +4,7 @@ A template for LagrangeGo
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/ExquisiteCore/LagrangeGo-Template)](https://goreportcard.com/report/github.com/ExquisiteCore/LagrangeGo-Template)
 
-基于 [LagrangeGo](https://github.com/LagrangeDev/LagrangeGo) 的Bot 模板
+基于 [LagrangeGo](https://github.com/LagrangeDev/LagrangeGo) 的Bot 模板参考自[MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
 
 ## 基础配置
 
