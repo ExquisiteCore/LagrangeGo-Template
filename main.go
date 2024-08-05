@@ -24,7 +24,9 @@ func main() {
 
 	bot.Login()
 
-	logic.Startlogic()
+	logic.RegisterCustomLogic()
+
+	logic.SetupLogic()
 
 	defer bot.QQClient.Release()
 
