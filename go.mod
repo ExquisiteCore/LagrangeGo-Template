@@ -4,7 +4,7 @@ go 1.22.4
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/LagrangeDev/LagrangeGo v0.0.0-20240803055404-4195ca56729c // indirect
+	github.com/LagrangeDev/LagrangeGo v0.0.0-20240807114448-90575e8fa78b // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 
@@ -23,7 +23,7 @@ require (
 	github.com/tidwall/gjson v1.17.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	golang.org/x/image v0.18.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/image v0.19.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.23.0 // indirect
 )
