@@ -24,6 +24,8 @@ func main() {
 
 	bot.Login()
 
+	bot.Listen()
+
 	logic.RegisterCustomLogic()
 
 	logic.SetupLogic()

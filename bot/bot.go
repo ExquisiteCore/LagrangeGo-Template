@@ -47,6 +47,18 @@ func Init(logger *utils.ProtocolLogger) {
 
 // Login 登录
 func Login() error {
+	//自动登录
+	sig := QQClient.Sig()
+	if sig != nil {
+		err := QQClient.FastLogin()
+		if err != nil {
+			logrus.Errorln("fast login err:", err)
+			logrus.Println("change to qrcode mode.")
+		} else {
+			return nil
+		}
+	}
+
 	//获取二维码
 	png, _, err := QQClient.FetchQRCodeDefault()
 	if err != nil {
@@ -85,11 +97,14 @@ func Login() error {
 		logrus.Errorln("login err:", err)
 		return err
 	}
-	//监听状态
+	return nil
+}
+
+// 监听状态
+func Listen() {
 	QQClient.DisconnectedEvent.Subscribe(func(client *client.QQClient, event *client.DisconnectedEvent) {
 		logrus.Infof("连接已断开：%v", event.Message)
 	})
-	return nil
 }
 
 // 保存sign
