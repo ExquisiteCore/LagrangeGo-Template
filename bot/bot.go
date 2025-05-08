@@ -10,6 +10,7 @@ import (
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
+	"github.com/LagrangeDev/LagrangeGo/client/packets/wtlogin/qrcodestate"
 	"github.com/sirupsen/logrus"
 )
 
@@ -76,8 +77,9 @@ func Login() error {
 	//打印二维码
 	logrus.Infof("qrcode saved to %s", qrcodePath)
 	//轮询登录状态
+	var retCode qrcodestate.State
 	for {
-		retCode, err := QQClient.GetQRCodeResult()
+		retCode, err = QQClient.GetQRCodeResult()
 		if err != nil {
 			logrus.Errorln(err)
 			return err
