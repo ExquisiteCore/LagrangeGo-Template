@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
 
 )
 
@@ -26,7 +26,7 @@ require (
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	golang.org/x/image v0.25.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/image v0.27.0 // indirect
+	golang.org/x/sync v0.14.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 )
