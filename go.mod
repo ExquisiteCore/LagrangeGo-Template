@@ -6,13 +6,12 @@ toolchain go1.24.1
 
 require (
 	github.com/BurntSushi/toml v1.4.0
-	github.com/LagrangeDev/LagrangeGo v0.1.3
+	github.com/LagrangeDev/LagrangeGo v0.1.4
 	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
 	golang.org/x/net v0.40.0 // indirect
-
 )
 
 require (
