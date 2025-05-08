@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/fumiama/orbyte v0.0.0-20250414142006-765c970d70b9 // indirect
 	golang.org/x/net v0.40.0 // indirect
 )
 
