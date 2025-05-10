@@ -1,12 +1,15 @@
 package bot
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"time"
 
 	"github.com/ExquisiteCore/LagrangeGo-Template/config"
 	"github.com/ExquisiteCore/LagrangeGo-Template/utils"
+	"github.com/mdp/qrterminal/v3"
+	"github.com/tuotoo/qrcode"
 
 	"github.com/LagrangeDev/LagrangeGo/client"
 	"github.com/LagrangeDev/LagrangeGo/client/auth"
@@ -67,15 +70,22 @@ func Login() error {
 		return err
 	}
 
-	//保存本地二维码
-	qrcodePath := "qrcode.png"
-	err = os.WriteFile(qrcodePath, png, 0644)
+	// 打印二维码内容
+	qrMatrix, err := qrcode.Decode(bytes.NewReader(png))
 	if err != nil {
-		logrus.Errorln("write qrcode err:", err)
-		return err
+		logrus.Warnln("二维码内容识别失败，可能无法终端打印:", err)
+	} else {
+		logrus.Infoln("请使用手机扫码登录：")
+		config := qrterminal.Config{
+			Level:     qrterminal.M,
+			Writer:    os.Stdout,
+			BlackChar: qrterminal.WHITE,
+			WhiteChar: qrterminal.BLACK,
+			QuietZone: 1,
+		}
+		qrterminal.GenerateWithConfig(qrMatrix.Content, config)
 	}
-	//打印二维码
-	logrus.Infof("qrcode saved to %s", qrcodePath)
+
 	//轮询登录状态
 	var retCode qrcodestate.State
 	for {
