@@ -5,33 +5,38 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ExquisiteCore/LagrangeGo-Template/bot"
-	"github.com/ExquisiteCore/LagrangeGo-Template/config"
+	"github.com/ExquisiteCore/LagrangeGo-Template/app"
 	"github.com/ExquisiteCore/LagrangeGo-Template/logic"
-	"github.com/ExquisiteCore/LagrangeGo-Template/utils"
 )
 
-// 创建 protocolLogger 实例
-var logger = utils.ProtocolLogger{}
-
-func init() {
-	config.Init()
-	utils.Init()
-	bot.Init(&logger)
-}
-
 func main() {
+	// 使用依赖注入容器
+	container := app.NewContainer()
+	err := container.Initialize()
+	if err != nil {
+		panic(err)
+	}
 
-	bot.Login()
+	bot := container.GetBot()
+	logicManager := container.GetLogicManager()
 
+	// 登录
+	err = bot.Login()
+	if err != nil {
+		panic(err)
+	}
+
+	// 监听
 	bot.Listen()
 
+	// 注册自定义逻辑
+	logic.Manager = logicManager
 	logic.RegisterCustomLogic()
 
-	logic.SetupLogic()
+	// 设置事件监听
+	logicManager.SetupEventListeners()
 
-	defer bot.QQClient.Release()
-
+	defer bot.Client().Release()
 	defer bot.Dumpsig()
 
 	// setup the main stop channel
