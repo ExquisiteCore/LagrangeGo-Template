@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/ExquisiteCore/LagrangeGo-Template/utils"
 	"github.com/LagrangeDev/LagrangeGo/client"
-	"github.com/sirupsen/logrus"
 )
 
 // LoginStrategy 登录策略接口
@@ -36,6 +36,7 @@ type LoginManager struct {
 	client     *client.QQClient
 	strategies []LoginStrategy
 	context    *LoginContext
+	logger     utils.Logger
 }
 
 // NewLoginManager 创建新的登录管理器
@@ -43,11 +44,12 @@ func NewLoginManager(client *client.QQClient) *LoginManager {
 	lm := &LoginManager{
 		client:  client,
 		context: DefaultLoginContext(),
+		logger:  utils.GetLogger().WithField("module", "login"),
 	}
 
 	// 注册默认登录策略
-	lm.RegisterStrategy(&FastLoginStrategy{})
-	lm.RegisterStrategy(&QRCodeLoginStrategy{})
+	lm.RegisterStrategy(&FastLoginStrategy{logger: lm.logger})
+	lm.RegisterStrategy(&QRCodeLoginStrategy{logger: lm.logger})
 
 	return lm
 }
@@ -63,15 +65,15 @@ func (lm *LoginManager) Login() error {
 	defer cancel()
 
 	for _, strategy := range lm.strategies {
-		logrus.Infof("尝试使用 %s 登录", strategy.GetStrategyName())
+		lm.logger.Infof("尝试使用 %s 登录", strategy.GetStrategyName())
 
 		err := lm.tryLoginWithRetry(ctx, strategy)
 		if err == nil {
-			logrus.Infof("使用 %s 登录成功", strategy.GetStrategyName())
+			lm.logger.Infof("使用 %s 登录成功", strategy.GetStrategyName())
 			return nil
 		}
 
-		logrus.Warnf("使用 %s 登录失败: %v", strategy.GetStrategyName(), err)
+		lm.logger.Warnf("使用 %s 登录失败: %v", strategy.GetStrategyName(), err)
 	}
 
 	return errors.New("所有登录策略都失败了")
@@ -95,7 +97,7 @@ func (lm *LoginManager) tryLoginWithRetry(ctx context.Context, strategy LoginStr
 
 		lastErr = err
 		if i < lm.context.MaxRetries-1 {
-			logrus.Warnf("第 %d 次尝试失败: %v，%v 后重试", i+1, err, lm.context.RetryDelay)
+			lm.logger.Warnf("第 %d 次尝试失败: %v，%v 后重试", i+1, err, lm.context.RetryDelay)
 			time.Sleep(lm.context.RetryDelay)
 		}
 	}
@@ -104,7 +106,9 @@ func (lm *LoginManager) tryLoginWithRetry(ctx context.Context, strategy LoginStr
 }
 
 // FastLoginStrategy 快速登录策略
-type FastLoginStrategy struct{}
+type FastLoginStrategy struct {
+	logger utils.Logger
+}
 
 func (s *FastLoginStrategy) GetStrategyName() string {
 	return "快速登录"
@@ -122,6 +126,7 @@ func (s *FastLoginStrategy) Login(ctx context.Context, client *client.QQClient) 
 // QRCodeLoginStrategy 二维码登录策略
 type QRCodeLoginStrategy struct {
 	qrProcessor *QRCodeProcessor
+	logger      utils.Logger
 }
 
 func (s *QRCodeLoginStrategy) GetStrategyName() string {
@@ -142,7 +147,7 @@ func (s *QRCodeLoginStrategy) Login(ctx context.Context, client *client.QQClient
 	// 显示二维码
 	err = s.qrProcessor.DisplayQRCode(png)
 	if err != nil {
-		logrus.Warnf("二维码显示失败: %v", err)
+		s.logger.Warnf("二维码显示失败: %v", err)
 	}
 
 	// 轮询登录状态

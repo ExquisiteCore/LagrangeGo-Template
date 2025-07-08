@@ -26,7 +26,7 @@ func NewContainer() *Container {
 // Initialize 初始化所有依赖
 func (c *Container) Initialize() error {
 	c.config = &config.Config{}
-	c.logger = &utils.ProtocolLogger{}
+	c.logger = utils.GetProtocolLogger()
 
 	// 初始化配置
 	config.Init()
