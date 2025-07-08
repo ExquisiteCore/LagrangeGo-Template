@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            suffix: linux-amd64
+          - goos: linux
+            goarch: arm64
+            suffix: linux-arm64
+          - goos: windows
+            goarch: amd64
+            suffix: windows-amd64.exe
+          - goos: darwin
+            goarch: amd64
+            suffix: darwin-amd64
+          - goos: darwin
+            goarch: arm64
+            suffix: darwin-arm64
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+    
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+    
+    - name: Download dependencies
+      run: go mod download
+    
+    - name: Build
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 0
+      run: |
+        mkdir -p dist
+        go build -ldflags="-s -w -X main.version=${{ github.ref_name }}" -o dist/lagrange-${{ matrix.suffix }} .
+    
+    - name: Create archive
+      run: |
+        cd dist
+        if [[ "${{ matrix.goos }}" == "windows" ]]; then
+          zip lagrange-${{ matrix.suffix }}.zip lagrange-${{ matrix.suffix }}
+        else
+          tar -czf lagrange-${{ matrix.suffix }}.tar.gz lagrange-${{ matrix.suffix }}
+        fi
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: |
+          ${{ matrix.goos == 'windows' && 'dist/lagrange-' || 'dist/lagrange-' }}${{ matrix.suffix }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
+        asset_name: |
+          lagrange-${{ matrix.suffix }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
+        asset_content_type: application/octet-stream
