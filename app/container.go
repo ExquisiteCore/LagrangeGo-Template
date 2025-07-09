@@ -45,6 +45,9 @@ func (c *Container) Initialize() error {
 
 	// 创建Bot
 	c.bot = bot.NewBot(c.client)
+	
+	// 加载签名文件
+	c.bot.GetAuthManager().LoadSig()
 
 	// 创建逻辑管理器
 	c.logicManager = logic.NewLogicManager(c.client)
