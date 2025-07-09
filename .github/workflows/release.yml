@@ -69,13 +69,7 @@ jobs:
         fi
     
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: |
-          ${{ matrix.goos == 'windows' && 'dist/lagrange-' || 'dist/lagrange-' }}${{ matrix.suffix }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
-        asset_name: |
-          lagrange-${{ matrix.suffix }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}
-        asset_content_type: application/octet-stream
+        files: |
+          dist/lagrange-${{ matrix.suffix }}${{ matrix.goos == 'windows' && '.zip' || '.tar.gz' }}

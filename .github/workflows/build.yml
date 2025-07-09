@@ -89,7 +89,7 @@ jobs:
         go build -ldflags="-s -w" -o dist/lagrange-${{ matrix.suffix }} .
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: lagrange-${{ matrix.suffix }}
         path: dist/lagrange-${{ matrix.suffix }}
