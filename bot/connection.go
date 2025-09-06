@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ExquisiteCore/LagrangeGo-Template/utils"
 	"github.com/LagrangeDev/LagrangeGo/client"
-	"github.com/sirupsen/logrus"
 )
 
 // ConnectionState 连接状态
@@ -136,7 +136,7 @@ func (cm *ConnectionManager) startReconnect() {
 		}
 		
 		cm.notifyReconnecting(i)
-		logrus.Infof("尝试重连 (%d/%d)", i, cm.config.MaxReconnectTries)
+		utils.Infof("尝试重连 (%d/%d)", i, cm.config.MaxReconnectTries)
 		
 		// 这里应该调用重连逻辑，暂时简化
 		time.Sleep(cm.config.ReconnectInterval)
@@ -165,7 +165,7 @@ func (cm *ConnectionManager) startHeartbeat() {
 		case <-ticker.C:
 			// 发送心跳包或检查连接状态
 			if cm.GetState() == Connected {
-				logrus.Debug("发送心跳包")
+				utils.Debug("发送心跳包")
 				// 这里可以添加实际的心跳逻辑
 			}
 		}
@@ -201,17 +201,17 @@ func (cm *ConnectionManager) notifyReconnectFailed() {
 type DefaultConnectionEventHandler struct{}
 
 func (h *DefaultConnectionEventHandler) OnConnected(client *client.QQClient) {
-	logrus.Info("连接已建立")
+	utils.Info("连接已建立")
 }
 
 func (h *DefaultConnectionEventHandler) OnDisconnected(client *client.QQClient, reason string) {
-	logrus.Infof("连接已断开：%v", reason)
+	utils.Infof("连接已断开：%v", reason)
 }
 
 func (h *DefaultConnectionEventHandler) OnReconnecting(client *client.QQClient, attempt int) {
-	logrus.Infof("正在重连，第 %d 次尝试", attempt)
+	utils.Infof("正在重连，第 %d 次尝试", attempt)
 }
 
 func (h *DefaultConnectionEventHandler) OnReconnectFailed(client *client.QQClient, maxAttempts int) {
-	logrus.Errorf("重连失败，已达到最大尝试次数 %d", maxAttempts)
+	utils.Errorf("重连失败，已达到最大尝试次数 %d", maxAttempts)
 }
