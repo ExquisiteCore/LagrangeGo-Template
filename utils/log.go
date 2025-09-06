@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -90,8 +91,8 @@ func NewBotLogger(config *LogConfig) *BotLogger {
 	
 	logger := logrus.New()
 	
-	// 设置日志级别
-	logger.SetLevel(logrus.Level(config.Level))
+	// 设置日志级别 (修复等级反向问题)
+	logger.SetLevel(convertToLogrusLevel(config.Level))
 	
 	// 设置格式化器
 	if config.Format == "json" {
@@ -102,14 +103,21 @@ func NewBotLogger(config *LogConfig) *BotLogger {
 		if config.EnableColor {
 			logger.SetFormatter(&ColoredFormatter{})
 		} else {
-			logger.SetFormatter(&logrus.TextFormatter{
-				TimestampFormat: "2006-01-02 15:04:05",
-				FullTimestamp:   true,
-			})
+			logger.SetFormatter(&PlainFormatter{})
 		}
 	}
 	
-	// 设置输出
+	// 设置输出 (修复彩色输出和文件输出冲突)
+	var outputs []io.Writer
+	
+	// 总是添加控制台输出
+	if config.EnableColor {
+		outputs = append(outputs, colorable.NewColorableStdout())
+	} else {
+		outputs = append(outputs, os.Stdout)
+	}
+	
+	// 如果启用文件输出，添加文件输出
 	if config.EnableFile {
 		// 创建日志目录
 		if err := os.MkdirAll(config.LogDir, 0755); err != nil {
@@ -122,20 +130,11 @@ func NewBotLogger(config *LogConfig) *BotLogger {
 		if err != nil {
 			panic(fmt.Sprintf("打开日志文件失败: %v", err))
 		}
-		
-		// 如果启用颜色，控制台使用彩色输出，文件使用普通输出
-		if config.EnableColor {
-			logger.SetOutput(colorable.NewColorableStdout())
-		} else {
-			logger.SetOutput(file)
-		}
-	} else {
-		if config.EnableColor {
-			logger.SetOutput(colorable.NewColorableStdout())
-		} else {
-			logger.SetOutput(os.Stdout)
-		}
+		outputs = append(outputs, file)
 	}
+	
+	// 使用多重输出
+	logger.SetOutput(io.MultiWriter(outputs...))
 	
 	return &BotLogger{
 		Logger: logger,
@@ -250,6 +249,26 @@ func (f *ColoredFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		timestamp, levelColor, strings.ToUpper(entry.Level.String()), colorReset, fieldsStr, entry.Message)), nil
 }
 
+// PlainFormatter 普通格式化器 (不带颜色)
+type PlainFormatter struct{}
+
+func (f *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	timestamp := entry.Time.Format("2006-01-02 15:04:05")
+	
+	// 格式化字段
+	var fieldsStr string
+	if len(entry.Data) > 0 {
+		fields := make([]string, 0, len(entry.Data))
+		for key, value := range entry.Data {
+			fields = append(fields, fmt.Sprintf("%s=%v", key, value))
+		}
+		fieldsStr = fmt.Sprintf(" [%s]", strings.Join(fields, " "))
+	}
+	
+	return utils.S2B(fmt.Sprintf("[%s] [%s]%s: %s\n",
+		timestamp, strings.ToUpper(entry.Level.String()), fieldsStr, entry.Message)), nil
+}
+
 // 全局日志器
 var (
 	globalLogger Logger
@@ -348,4 +367,26 @@ func WithField(key string, value interface{}) Logger {
 
 func WithFields(fields map[string]interface{}) Logger {
 	return GetLogger().WithFields(fields)
+}
+
+// convertToLogrusLevel 转换日志等级
+func convertToLogrusLevel(level LogLevel) logrus.Level {
+	switch level {
+	case TraceLevel:
+		return logrus.TraceLevel
+	case DebugLevel:
+		return logrus.DebugLevel
+	case InfoLevel:
+		return logrus.InfoLevel
+	case WarnLevel:
+		return logrus.WarnLevel
+	case ErrorLevel:
+		return logrus.ErrorLevel
+	case FatalLevel:
+		return logrus.FatalLevel
+	case PanicLevel:
+		return logrus.PanicLevel
+	default:
+		return logrus.InfoLevel
+	}
 }
