@@ -1,10 +1,7 @@
 package bot
 
 import (
-	"github.com/ExquisiteCore/LagrangeGo-Template/config"
-	"github.com/ExquisiteCore/LagrangeGo-Template/utils"
 	"github.com/LagrangeDev/LagrangeGo/client"
-	"github.com/LagrangeDev/LagrangeGo/client/auth"
 )
 
 // Bot 使用组合模式而不是继承
@@ -25,11 +22,11 @@ func NewBot(client *client.QQClient) *Bot {
 		loginMgr: NewLoginManager(client),
 		authMgr:  NewAuthManager(client, "sig.bin"),
 	}
-	
+
 	// 创建连接管理器并注册默认事件处理器
 	bot.connectionMgr = NewConnectionManager(client)
 	bot.connectionMgr.RegisterEventHandler(&DefaultConnectionEventHandler{})
-	
+
 	return bot
 }
 
@@ -71,17 +68,4 @@ func (b *Bot) GetLoginManager() *LoginManager {
 // GetAuthManager 获取认证管理器
 func (b *Bot) GetAuthManager() *AuthManager {
 	return b.authMgr
-}
-
-// Init 初始化Bot（向后兼容）
-func Init(logger *utils.ProtocolLogger) {
-	appInfo := auth.AppList["linux"]["3.2.15-30366"]
-	qqClientInstance := client.NewClient(config.GlobalConfig.Bot.Account, config.GlobalConfig.Bot.Password)
-	qqClientInstance.SetLogger(logger)
-	qqClientInstance.UseVersion(appInfo)
-	qqClientInstance.AddSignServer(config.GlobalConfig.Bot.SignServer)
-	qqClientInstance.UseDevice(auth.NewDeviceInfo(114514))
-
-	QQClient = NewBot(qqClientInstance)
-	QQClient.authMgr.LoadSig()
 }
